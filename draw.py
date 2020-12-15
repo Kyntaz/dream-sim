@@ -5,6 +5,8 @@ from matplotlib import pyplot as plt
 import numpy as np
 from mcrng import McRng
 from tqdm import tqdm
+import scipy as sp
+import scipy.stats
 
 dream_data = [(22,3), (5,3), (24,2), (18,2), (4,0), (1,1), (7,2), (12,5), (26,3), (8,2), (5,2), (20,2), (2,0), (13,1), (10,2), (10,2), (21,2), (20,2), (10,2), (3,1), (18,2), (3,2)]
 dream_data_cum = [(0,0)]
@@ -91,8 +93,16 @@ def plot_dist(file, color="tab:blue"):
             ps.append(p_t)
         plt.hist(ps, color=color, histtype="bar", range=(0,max(ps)), bins=np.arange(max(ps)+1)-0.5, density=True)
         plt.axvline(np.mean(ps), color="tab:red", ls=":", label="Average")
-        plt.axvline(263.0 * 20 / 423, color="tab:orange", ls=":", label="Expected")
+        plt.axvline(263.0 * 20 / 423, color="tab:orange", ls=":", label="Expected Average")
 
+        m,v = sp.stats.norm.fit(ps)
+        print(f"BF: Mean: {m}, SD: {v}")
+        x = np.linspace(0,max(ps))
+        plt.plot(x, sp.stats.norm.pdf(x,m,v), color="tab:red", label="Best Fit")
+        m,v = sp.stats.binom.stats(262, 20/423)
+        v = np.sqrt(v)
+        print(f"E: Mean: {m}, SD: {v}")
+        plt.plot(x, sp.stats.norm.pdf(x,m,v), color="tab:orange", label="Expected Distribution")
         plt.xlabel("Accumulated Pearl Trades", weight="bold")
         plt.ylabel("Probability", weight="bold")
         plt.legend()
